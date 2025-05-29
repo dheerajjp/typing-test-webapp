@@ -91,115 +91,117 @@ const TypingTest: React.FC = () => {
   }, [difficulty, resetTest]);
 
   // Timer and Real-time WPM Calculation Logic
-  useEffect(() => {
-    // Clear any existing timer before starting a new one
+useEffect(() => {
+  if (!startTime || endTime || testCompleted) {
+    // Stop the interval if no startTime, test is complete, or already ended
     if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
-    
-    if (startTime && !endTime) {
-      // Set initial elapsed time immediately if needed (e.g., resuming)
-      // setElapsedTime(Math.floor((Date.now() - startTime) / 1000)); 
-      
-      timerRef.current = setInterval(() => {
-        const now = Date.now();
-        const currentElapsedTime = Math.floor((now - startTime) / 1000);
-        setElapsedTime(currentElapsedTime); // Update live timer display
+    return;
+  }
 
-        // Calculate Real-time Net WPM
-        if (currentElapsedTime > 0 && typedText.length > 0) {
-          const minutes = currentElapsedTime / 60;
-          let correctChars = 0;
-          for (let i = 0; i < typedText.length; i++) {
-            if (i < textToType.length && typedText[i] === textToType[i]) {
-              correctChars++;
-            }
-          }
-          const currentNetWpm = Math.round((correctChars / 5) / minutes);
-          setWpm(currentNetWpm >= 0 ? currentNetWpm : 0);
+  timerRef.current = setInterval(() => {
+    // live time in seconds with two decimals
+    const now = Date.now();
+    const time = (now - startTime) / 1000;
+    setElapsedTime(time);
+    // Calculate live WPM
+    if (time > 0 && typedText.length > 0) {
+      const minutes = time / 60;
+      let correctChars = 0;
+      for (let i = 0; i < typedText.length; i++) {
+        if (i < textToType.length && typedText[i] === textToType[i]) {
+          correctChars++;
         }
-      }, 1000);
-    } 
-
-    // Cleanup interval on component unmount or when dependencies change that stop the timer
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
       }
-    };
-  // Rerun effect if startTime or endTime changes
-  }, [startTime, endTime, typedText.length, textToType]); // Added typedText.length to ensure WPM updates
+      const currentNetWpm = Math.round((correctChars / 5) / minutes);
+      setWpm(currentNetWpm >= 0 ? currentNetWpm : 0);
+    }
+  }, 30); // Fast refresh for smooth 2 decimal places
+
+  // Cleanup
+  return () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+}, [startTime, endTime, testCompleted, typedText, textToType]);
+
 
   // Handle input changes, Accuracy, and Test Completion
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const currentTypedValue = event.target.value;
+  const currentTypedValue = event.target.value;
 
-    if (testCompleted) return;
+  if (testCompleted) return;
 
-    // Start timer on first keystroke
-    if (!startTime && currentTypedValue.length > 0) {
-      setStartTime(Date.now());
+  // Start timer on first keystroke
+  if (!startTime && currentTypedValue.length > 0) {
+    setStartTime(Date.now());
+  }
+
+  setTotalKeystrokes(prev => prev + 1);
+  setTypedText(currentTypedValue);
+  setCurrentIndex(currentTypedValue.length);
+
+  // Calculate errors and accuracy
+  let currentErrors = 0;
+  let correctCharsCount = 0;
+  for (let i = 0; i < currentTypedValue.length; i++) {
+    if (i >= textToType.length || currentTypedValue[i] !== textToType[i]) {
+      currentErrors++;
+    } else {
+      correctCharsCount++;
     }
+  }
+  setErrors(currentErrors);
 
-    setTotalKeystrokes(prev => prev + 1);
-    setTypedText(currentTypedValue);
-    setCurrentIndex(currentTypedValue.length);
-
-    // Calculate errors and accuracy
-    let currentErrors = 0;
-    let correctCharsCount = 0;
-    for (let i = 0; i < currentTypedValue.length; i++) {
-      if (i >= textToType.length || currentTypedValue[i] !== textToType[i]) {
-        currentErrors++;
-      } else {
-        correctCharsCount++;
-      }
-    }
-    setErrors(currentErrors);
-
-    const currentAccuracy = currentTypedValue.length > 0
+  const currentAccuracy =
+    currentTypedValue.length > 0
       ? (correctCharsCount / currentTypedValue.length) * 100
       : 100;
-    setAccuracy(currentAccuracy < 0 ? 0 : currentAccuracy);
+  setAccuracy(currentAccuracy < 0 ? 0 : currentAccuracy);
 
-    // Check if test is completed
-    if (currentTypedValue.length === textToType.length) {
-      const finalEndTime = Date.now();
-      setEndTime(finalEndTime); // This stops the timer useEffect
-      setTestCompleted(true);
-      
-      const calculatedFinalTime = Math.floor(((finalEndTime - (startTime || finalEndTime)) / 1000));
-      setFinalTime(calculatedFinalTime); // Store final time
-      setElapsedTime(calculatedFinalTime); // Ensure final time is shown in stats
+  // Check if test is completed
+  if (currentTypedValue.length === textToType.length) {
+    const finalEndTime = Date.now();
+    setEndTime(finalEndTime); // This stops the timer useEffect
+    setTestCompleted(true);
 
-      const timeInMinutes = calculatedFinalTime / 60;
-      if (timeInMinutes > 0) {
-        let finalCorrectChars = 0;
-        for(let i = 0; i < textToType.length; i++) {
-            if (typedText.length > i && typedText[i] === textToType[i]) {
-              finalCorrectChars++;
-            }
+    // Calculate final time in seconds (with two decimal places)
+    const calculatedFinalTime = ((finalEndTime - (startTime || finalEndTime)) / 1000);
+    setFinalTime(calculatedFinalTime); // Store final time (two decimals)
+    setElapsedTime(calculatedFinalTime); // Ensure final time is shown in stats
+
+    const timeInMinutes = calculatedFinalTime / 60;
+    if (timeInMinutes > 0) {
+      let finalCorrectChars = 0;
+      for (let i = 0; i < textToType.length; i++) {
+        if (currentTypedValue.length > i && currentTypedValue[i] === textToType[i]) {
+          finalCorrectChars++;
         }
-        const finalWpm = Math.round((finalCorrectChars / 5) / timeInMinutes);
-        setWpm(finalWpm >= 0 ? finalWpm : 0);
-      } else {
-        setWpm(0);
       }
+      const finalWpm = Math.round((finalCorrectChars / 5) / timeInMinutes);
+      setWpm(finalWpm >= 0 ? finalWpm : 0);
+    } else {
+      setWpm(0);
+    }
 
-      let finalCorrectCount = 0;
-       for(let i = 0; i < textToType.length; i++) {
-         if (typedText.length > i && typedText[i] === textToType[i]) {
-           finalCorrectCount++;
-         }
-       }
-      const finalAccuracy = textToType.length > 0
+    let finalCorrectCount = 0;
+    for (let i = 0; i < textToType.length; i++) {
+      if (currentTypedValue.length > i && currentTypedValue[i] === textToType[i]) {
+        finalCorrectCount++;
+      }
+    }
+    const finalAccuracy =
+      textToType.length > 0
         ? (finalCorrectCount / textToType.length) * 100
         : 100;
-      setAccuracy(finalAccuracy < 0 ? 0 : finalAccuracy);
-    }
-  };
+    setAccuracy(finalAccuracy < 0 ? 0 : finalAccuracy);
+  }
+};
+
 
   // Render text with character highlighting
   const renderText = () => {
@@ -269,7 +271,13 @@ const TypingTest: React.FC = () => {
         <div className={styles.statBox}>
           <span className={styles.statLabel}>Time:</span>
           {/* Display finalTime if test is completed, otherwise live elapsedTime */}
-          <span className={styles.statValue}>{testCompleted && finalTime !== null ? finalTime : elapsedTime}s</span>
+          <span className={styles.statValue}>
+  {testCompleted && finalTime !== null
+    ? finalTime.toFixed(2)
+    : elapsedTime.toFixed(2)
+  }s
+</span>
+
         </div>
         <div className={styles.statBox}>
           <span className={styles.statLabel}>WPM:</span>
