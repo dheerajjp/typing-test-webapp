@@ -1,0 +1,127 @@
+/* Results.module.css */
+
+.resultsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    font-family: sans-serif;
+  }
+  
+  .resultsTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .resultsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+  
+  .resultCard {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .resultCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .resultLabel {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .resultValue {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  
+  /* Different colors for different metrics */
+  .resultCard:nth-child(1) .resultValue {
+    color: #2563eb; /* WPM - blue */
+  }
+  
+  .resultCard:nth-child(2) .resultValue {
+    color: #16a34a; /* Accuracy - green */
+  }
+  
+  .resultCard:nth-child(3) .resultValue {
+    color: #9333ea; /* Time - purple */
+  }
+  
+  .resultCard:nth-child(4) .resultValue {
+    color: #ea580c; /* Keystrokes - orange */
+  }
+  
+  .tryAgainButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #2563eb;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .tryAgainButton:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .tryAgainButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 640px) {
+    .resultsContainer {
+      padding: 1.5rem;
+    }
+    
+    .resultsTitle {
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .resultsGrid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .resultCard {
+      padding: 1.25rem;
+    }
+    
+    .resultValue {
+      font-size: 2rem;
+    }
+    
+    .tryAgainButton {
+      width: 100%;
+    }
+  }
