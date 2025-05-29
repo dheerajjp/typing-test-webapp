@@ -1,127 +1,121 @@
-/* Results.module.css */
+/* Results.module.css - Minimalist Grey Sophistication */
 
 .resultsContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: #f8fafc;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 2rem auto; /* Added margin */
+  background-color: #F8F9FA; /* Lighter Off-white background */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid #EDF2F4; /* Subtle border */
+  font-family: sans-serif;
+}
+
+.resultsTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1B1C2B; /* Near Black text */
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.resultCard {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid #EDF2F4;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resultCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.05), 0 2px 3px -1px rgba(0, 0, 0, 0.03);
+}
+
+.resultLabel {
+  font-size: 0.9rem; /* Adjusted size */
+  font-weight: 600;
+  color: #8D99AE; /* Base medium grey label */
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.resultValue {
+  font-size: 2.2rem; /* Adjusted size */
+  font-weight: 700;
+  color: #2B2D42; /* Dark Grey value */
+}
+
+/* Optional: Keep distinct colors for metrics or make them all dark grey */
+/* 
+.resultCard:nth-child(1) .resultValue { color: #2B2D42; } WPM
+.resultCard:nth-child(2) .resultValue { color: #2B2D42; } Accuracy
+.resultCard:nth-child(3) .resultValue { color: #2B2D42; } Time
+.resultCard:nth-child(4) .resultValue { color: #2B2D42; } Keystrokes
+*/
+
+.tryAgainButton {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #8D99AE; /* Base medium grey button */
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tryAgainButton:hover {
+  background-color: #6B7A8F; /* Darker grey on hover */
+}
+
+.tryAgainButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(141, 153, 174, 0.3); /* Focus ring with base grey */
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+  .resultsContainer {
+    padding: 1.5rem;
+    margin: 1rem; /* Adjust margin */
   }
   
   .resultsTitle {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 2rem;
-    text-align: center;
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
   }
   
   .resultsGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    width: 100%;
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .resultCard {
-    background-color: #ffffff;
-    border-radius: 8px;
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .resultCard:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  
-  .resultLabel {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    padding: 1.25rem;
   }
   
   .resultValue {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #0f172a;
-  }
-  
-  /* Different colors for different metrics */
-  .resultCard:nth-child(1) .resultValue {
-    color: #2563eb; /* WPM - blue */
-  }
-  
-  .resultCard:nth-child(2) .resultValue {
-    color: #16a34a; /* Accuracy - green */
-  }
-  
-  .resultCard:nth-child(3) .resultValue {
-    color: #9333ea; /* Time - purple */
-  }
-  
-  .resultCard:nth-child(4) .resultValue {
-    color: #ea580c; /* Keystrokes - orange */
+    font-size: 2rem;
   }
   
   .tryAgainButton {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: #2563eb;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: 100%;
   }
-  
-  .tryAgainButton:hover {
-    background-color: #1d4ed8;
-  }
-  
-  .tryAgainButton:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
-  }
-  
-  /* Responsive styles */
-  @media (max-width: 640px) {
-    .resultsContainer {
-      padding: 1.5rem;
-    }
-    
-    .resultsTitle {
-      font-size: 1.75rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .resultsGrid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    
-    .resultCard {
-      padding: 1.25rem;
-    }
-    
-    .resultValue {
-      font-size: 2rem;
-    }
-    
-    .tryAgainButton {
-      width: 100%;
-    }
-  }
+}

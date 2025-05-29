@@ -1,216 +1,206 @@
-/* TypingTest.module.css */
+/* TypingTest.module.css - MonkeyType Style */
 
+/* Apply background and base font to the container */
 .typingTestContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    font-family: sans-serif;
-    background-color: #f0f2f5; /* Light grey background */
-    min-height: 80vh; /* Ensure it takes up significant height */
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center children horizontally */
+  justify-content: center; /* Center children vertically */
+  min-height: 100vh; /* Full viewport height */
+  background-color: #696969; /* Dark grey background */
+  color: #CCCCCC; /* Default light grey text */
+  font-family: monospace, "Courier New", Courier; /* Typewriter font */
+  padding: 2rem;
+  box-sizing: border-box;
+  position: relative; /* For absolute positioning of title */
+  outline: none; /* Remove focus outline from container */
+}
+
+/* Style for the top-left title placeholder */
+.titlePlaceholder {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #E0E0E0; /* Lighter title color */
+  /* Add more styling as needed for the actual title */
+}
+
+/* Difficulty Selector Box */
+.difficultySelectorBox {
+  background-color: #555555; /* Darker grey box */
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 2rem; /* Space below selector */
+  display: flex;
+  gap: 1rem;
+}
+
+.difficultySelectorBox button {
+  background: none;
+  border: none;
+  color: #B0B0B0; /* Lighter grey for options */
+  font-family: inherit; /* Use monospace */
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.difficultySelectorBox button:hover {
+  color: #FFFFFF; /* White on hover */
+}
+
+.difficultySelectorBox button.activeDifficulty {
+  color: #D2B55B; /* Yellow for active selection */
+  font-weight: bold;
+}
+
+/* Text Display Area - No box, centered */
+.textDisplayContainer {
+  width: 100%;
+  max-width: 900px; /* Max width for readability */
+  margin-bottom: 2rem; /* Space below text */
+  position: relative; /* For focus prompt */
+}
+
+.textDisplay {
+  font-size: 1.8rem; /* Larger font size */
+  line-height: 1.8; /* Increased line height */
+  text-align: justify; /* Justify text for block appearance */
+  color: #999999; /* Initial lighter grey for pending text */
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
+  transition: color 0.2s ease;
+}
+
+/* Character states */
+.charPending {
+  color: #999999; /* Lighter grey for untyped characters */
+}
+
+.charCorrect {
+  color: #D2B55B; /* Yellow for correct */
+}
+
+.charIncorrect {
+  color: #A45A52; /* Red for incorrect */
+}
+
+/* Cursor Style */
+.cursor {
+  /* Simple underline cursor */
+  /* border-bottom: 2px solid #D2B55B; */ 
+  /* Blinking block cursor (more like MonkeyType) */
+  background-color: #D2B55B; /* Use correct color for cursor */
+  color: #696969; /* Background color for text inside cursor */
+  animation: blink 1s step-start infinite;
+  border-radius: 1px;
+  margin: 0 -1px; /* Adjust margin slightly for visual fit */
+  padding: 0 1px;
+}
+
+@keyframes blink {
+  50% {
+    background-color: transparent;
+    color: inherit; /* Revert color when transparent */
   }
-  
-  .title {
-    color: #333;
-    margin-bottom: 1.5rem;
-  }
-  
-  .textDisplayContainer {
-    background-color: #ffffff; /* White background for text area */
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    width: 100%;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-    overflow-wrap: break-word; /* Ensure long words wrap */
-    line-height: 1.8; /* Increase line height for readability */
-  }
-  
-  .textDisplay {
-    font-size: 1.4rem; /* Larger font for readability */
-    color: #555; /* Default text color */
-    letter-spacing: 1px; /* Add some spacing between letters */
-    white-space: pre-wrap; /* Preserve whitespace and wrap text */
-  }
-  
-  .textDisplay span {
-    transition: background-color 0.1s ease, color 0.1s ease;
-  }
-  
-  .correct {
-    color: #4CAF50; /* Green for correct characters */
-  }
-  
-  .incorrect {
-    color: #F44336; /* Red for incorrect characters */
-    background-color: #ffdddd; /* Light red background for incorrect */
-    text-decoration: underline;
-    text-decoration-color: #F44336;
-  }
-  
-  .current {
-    background-color: #e0e0e0; /* Grey background for current character */
-    padding: 0.1em 0; /* Slight padding to make cursor visible */
-    border-radius: 2px;
-    /* Blinking cursor effect (optional) */
-    /* animation: blink 1s infinite; */
-  }
-  
-  /* @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  } */
-  
-  .textInput {
-    width: 100%;
-    padding: 0.8rem 1rem;
+}
+
+/* Focus Prompt */
+.focusPrompt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #CCCCCC;
+  font-size: 1.2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  pointer-events: none; /* Don't block clicks to container */
+}
+
+/* Stats Container (Optional - Style if kept) */
+.statsContainer {
+  /* Position like MonkeyType (top area) or keep below */
+  /* Example: Minimalist stats below */
+  margin-top: 1rem;
+  color: #B0B0B0;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* Result Container (Optional - Style if kept) */
+.resultContainer {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #555555;
+  border-radius: 8px;
+  color: #E0E0E0;
+  text-align: center;
+}
+
+.resultContainer h2 {
+  margin-bottom: 0.5rem;
+  color: #FFFFFF;
+}
+
+.resultContainer p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.resultContainer button {
+  background-color: #D2B55B;
+  color: #696969;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resultContainer button:hover {
+  background-color: #E0C46F;
+}
+
+/* Remove styles for elements no longer used */
+.textInput {
+  display: none; /* Hide the old input box */
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 768px) {
+  .titlePlaceholder {
     font-size: 1.2rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-bottom: 1.5rem;
-    box-sizing: border-box; /* Include padding and border in element's total width and height */
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    top: 1rem;
+    left: 1rem;
   }
-  
-  .textInput:focus {
-    outline: none;
-    border-color: #007bff; /* Blue border on focus */
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-  }
-  
-  .textInput:disabled {
-    background-color: #eee;
-    cursor: not-allowed;
-  }
-  
-  .statsContainer {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    background-color: #e9ecef; /* Slightly different background for stats */
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-  }
-  
-  .statBox {
-    text-align: center;
-    padding: 0.5rem 1rem;
-    background-color: #ffffff;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    min-width: 100px; /* Ensure boxes have some minimum width */
-  }
-  
-  .statLabel {
-    display: block;
-    font-size: 0.9rem;
-    color: #6c757d; /* Grey label color */
-    margin-bottom: 0.25rem;
-  }
-  
-  .statValue {
+  .textDisplay {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: #343a40; /* Darker value color */
   }
-  
-  .resultContainer {
-    text-align: center;
-    margin-top: 1rem;
-    padding: 1.5rem;
-    background-color: #d4edda; /* Light green background for results */
-    border: 1px solid #c3e6cb;
-    border-radius: 8px;
-    width: 100%;
+  .difficultySelectorBox {
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
   }
-  
-  .resultTitle {
-    color: #155724; /* Dark green title */
-    margin-bottom: 0.5rem;
+  .difficultySelectorBox button {
+    font-size: 0.9rem;
   }
-  
-  .resultText {
-    color: #155724;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
+}
+
+@media (max-width: 480px) {
+  .textDisplay {
+    font-size: 1.2rem;
   }
-  
-  .resetButton {
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #007bff; /* Blue button */
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  .statsContainer {
+      gap: 1rem;
+      font-size: 0.8rem;
   }
-  
-  .resetButton:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-  }
-  
-  /* Basic Responsiveness */
-  @media (max-width: 768px) {
-    .typingTestContainer {
-      padding: 1rem;
-      margin: 1rem;
-    }
-  
-    .textDisplay {
-      font-size: 1.2rem;
-    }
-  
-    .textInput {
-      font-size: 1rem;
-    }
-  
-    .statsContainer {
-      flex-direction: column;
-      align-items: stretch;
-    }
-  
-    .statBox {
-      margin-bottom: 0.5rem;
-      min-width: unset;
-    }
-    
-    .statBox:last-child {
-      margin-bottom: 0;
-    }
-  
-    .statValue {
-      font-size: 1.3rem;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .textDisplay {
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-  
-    .statsContainer {
-      padding: 0.5rem;
-    }
-  
-    .statBox {
-      padding: 0.4rem 0.8rem;
-    }
-  
-    .statValue {
-      font-size: 1.2rem;
-    }
-  
-    .resetButton {
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-    }
-  }
-  
-  
+}
+
