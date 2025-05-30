@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from '../styles/TypingTest.module.css';
+// Ensure component import path and casing are correct
+import PerformanceGraph from '../components/PerformanceGraph';
+// Corrected type import path casing to match user's folder 'Types'
+import type { PerformanceDataPoint } from '../Types/index'; 
 
 // Word list remains the same
 const commonWords = [
-  "the", "be", "to", "of", "and", "a", "in", "that", "have", "I",
-  "it", "for", "not", "on", "with", "he", "as", "you", "do", "at",
-  "this", "but", "his", "by", "from", "they", "we", "say", "her", "she",
-  "or", "an", "will", "my", "one", "all", "would", "there", "their", "what",
-  "so", "up", "out", "if", "about", "who", "get", "which", "go", "me",
-  "when", "make", "can", "like", "time", "no", "just", "him", "know", "take",
-  "people", "into", "year", "your", "good", "some", "could", "them", "see", "other",
-  "than", "then", "now", "look", "only", "come", "its", "over", "think", "also",
-  "back", "after", "use", "two", "how", "our", "work", "first", "well", "way",
+  "the", "be", "to", "of", "and", "a", "in", "that", "have", "I", 
+  "it", "for", "not", "on", "with", "he", "as", "you", "do", "at", 
+  "this", "but", "his", "by", "from", "they", "we", "say", "her", "she", 
+  "or", "an", "will", "my", "one", "all", "would", "there", "their", "what", 
+  "so", "up", "out", "if", "about", "who", "get", "which", "go", "me", 
+  "when", "make", "can", "like", "time", "no", "just", "him", "know", "take", 
+  "people", "into", "year", "your", "good", "some", "could", "them", "see", "other", 
+  "than", "then", "now", "look", "only", "come", "its", "over", "think", "also", 
+  "back", "after", "use", "two", "how", "our", "work", "first", "well", "way", 
   "even", "new", "want", "because", "any", "these", "give", "day", "most", "us",
   "apple", "banana", "orange", "grape", "kiwi", "melon", "peach", "pear", "plum", "berry",
   "table", "chair", "lamp", "desk", "sofa", "bed", "rug", "shelf", "clock", "mirror",
@@ -23,7 +27,7 @@ const commonWords = [
 ];
 
 const sentenceLengths = {
-  short: 15,
+  short: 15, 
   medium: 30,
   long: 60
 };
@@ -45,19 +49,26 @@ interface CharState {
   state: 'pending' | 'correct' | 'incorrect';
 }
 
+// PerformanceDataPoint interface is now imported from '../Types/index'
+
 const TypingTest: React.FC = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [textToTypeChars, setTextToTypeChars] = useState<CharState[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
-  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [elapsedTime, setElapsedTime] = useState<number>(0); // Keep for live display
   const [finalTime, setFinalTime] = useState<number | null>(null);
   const [wpm, setWpm] = useState<number>(0);
   const [accuracy, setAccuracy] = useState<number>(100);
-  const [errors, setErrors] = useState<number>(0);
+  const [errors, setErrors] = useState<number>(0); // Total errors
+  const [totalKeystrokes, setTotalKeystrokes] = useState<number>(0); // Displayed in results
   const [testCompleted, setTestCompleted] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(true);
+  const [performanceData, setPerformanceData] = useState<PerformanceDataPoint[]>([]); // State for graph data
+  const lastWordEndIndexRef = useRef<number>(0);
+  const lastErrorCountRef = useRef<number>(0);
+  const wordIndexRef = useRef<number>(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -70,22 +81,25 @@ const TypingTest: React.FC = () => {
     setCurrentIndex(0);
     setStartTime(null);
     setEndTime(null);
-    setElapsedTime(0);
+    setElapsedTime(0); // Reset elapsed time
     setFinalTime(null);
     setWpm(0);
     setAccuracy(100);
     setErrors(0);
+    setTotalKeystrokes(0);
     setTestCompleted(false);
     setIsFocused(true);
+    setPerformanceData([]);
+    lastWordEndIndexRef.current = 0;
+    lastErrorCountRef.current = 0;
+    wordIndexRef.current = 0;
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    // Focus the main container to capture keydown events
-    setTimeout(() => {
-      containerRef.current?.focus();
-    }, 0);
+    containerRef.current?.focus();
+
   }, [difficulty]);
 
   // Initialize and handle difficulty changes
@@ -93,39 +107,43 @@ const TypingTest: React.FC = () => {
     resetTest(difficulty);
   }, [difficulty, resetTest]);
 
-  // Timer Logic with 2 decimals
+  // Timer Logic - Keep this to update elapsedTime state
   useEffect(() => {
     if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+        clearInterval(timerRef.current);
+        timerRef.current = null;
     }
     if (startTime && !endTime) {
       timerRef.current = setInterval(() => {
         const now = Date.now();
-        const currentElapsedTime = (now - startTime) / 1000;
-        setElapsedTime(currentElapsedTime);
-
-        // Real-time WPM (Net WPM)
-        if (currentElapsedTime > 0) {
-          let correctCharsCount = 0;
-          for (let i = 0; i < currentIndex; i++) {
-            if (textToTypeChars[i]?.state === 'correct') {
-              correctCharsCount++;
-            }
-          }
-          const minutes = currentElapsedTime / 60;
-          const currentNetWpm = Math.round((correctCharsCount / 5) / minutes);
-          setWpm(currentNetWpm >= 0 ? currentNetWpm : 0);
-        }
-      }, 30); // 30ms for smooth decimals
+        const currentElapsedTime = Math.floor((now - startTime) / 1000);
+        setElapsedTime(currentElapsedTime); // Update state for live display
+      }, 1000);
     }
+    // Cleanup interval on component unmount or when test ends
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
-        timerRef.current = null;
       }
     };
-  }, [startTime, endTime, currentIndex, textToTypeChars]);
+  }, [startTime, endTime]);
+
+  // Function to calculate WPM
+  const calculateCurrentWPM = useCallback((charIndex: number, currentTimeMs: number): number => {
+    if (!startTime || currentTimeMs <= startTime) return 0;
+
+    let correctCharsCount = 0;
+    for(let i = 0; i < charIndex; i++) {
+        if(i < textToTypeChars.length && textToTypeChars[i]?.state === 'correct') {
+            correctCharsCount++;
+        }
+    }
+    const minutes = (currentTimeMs - startTime) / 60000;
+    if (minutes <= 0) return 0;
+    const currentNetWpm = Math.round((correctCharsCount / 5) / minutes);
+    return currentNetWpm >= 0 ? currentNetWpm : 0;
+
+  }, [startTime, textToTypeChars]);
 
   // Handle Key Presses directly
   useEffect(() => {
@@ -133,78 +151,88 @@ const TypingTest: React.FC = () => {
       if (testCompleted || !isFocused) return;
 
       const { key } = event;
+      const currentTime = Date.now();
 
-      // Start timer on first valid keypress
-      if (!startTime && key.length === 1) {
-        setStartTime(Date.now());
+      if (!startTime && key.length === 1 && key !== ' ') {
+        setStartTime(currentTime);
       }
 
       if (key === 'Backspace') {
         event.preventDefault();
         if (currentIndex > 0) {
           const newIndex = currentIndex - 1;
+          let currentTotalErrors = errors;
           setTextToTypeChars(prevChars => {
             const newChars = [...prevChars];
             if (newChars[newIndex]) {
               if (newChars[newIndex].state === 'incorrect') {
-                setErrors(prev => prev - 1);
+                currentTotalErrors = Math.max(0, currentTotalErrors - 1);
               }
               newChars[newIndex].state = 'pending';
             }
             return newChars;
           });
+          setErrors(currentTotalErrors);
           setCurrentIndex(newIndex);
         }
       } else if (key.length === 1 && currentIndex < textToTypeChars.length) {
         event.preventDefault();
+        setTotalKeystrokes(prev => prev + 1);
         const expectedChar = textToTypeChars[currentIndex].char;
         let newState: CharState['state'];
+        let currentTotalErrors = errors;
 
         if (key === expectedChar) {
           newState = 'correct';
         } else {
           newState = 'incorrect';
-          setErrors(prev => prev + 1);
+          currentTotalErrors++;
         }
+        setErrors(currentTotalErrors);
 
-        setTextToTypeChars(prevChars => {
-          const newChars = [...prevChars];
-          newChars[currentIndex] = { ...newChars[currentIndex], state: newState };
-          return newChars;
-        });
+        const updatedChars = [...textToTypeChars];
+        updatedChars[currentIndex] = { ...updatedChars[currentIndex], state: newState };
+        setTextToTypeChars(updatedChars);
 
         const newIndex = currentIndex + 1;
         setCurrentIndex(newIndex);
 
-        // Check for completion
+        if ((key === ' ' || newIndex === textToTypeChars.length) && startTime) {
+            wordIndexRef.current++;
+            const currentWpm = calculateCurrentWPM(newIndex, currentTime);
+            const errorsSinceLastPoint = currentTotalErrors - lastErrorCountRef.current;
+            
+            setPerformanceData(prevData => [
+                ...prevData,
+                {
+                    index: wordIndexRef.current,
+                    wpm: currentWpm,
+                    errors: errorsSinceLastPoint >= 0 ? errorsSinceLastPoint : 0
+                }
+            ]);
+            lastWordEndIndexRef.current = newIndex;
+            lastErrorCountRef.current = currentTotalErrors;
+        }
+
+        // Update live WPM display (based on current progress)
+        if (startTime) {
+            const liveWpm = calculateCurrentWPM(newIndex, currentTime);
+            setWpm(liveWpm);
+        }
+
         if (newIndex === textToTypeChars.length) {
-          const finalEndTime = Date.now();
-          setEndTime(finalEndTime);
+          const finalEndTime = currentTime;
+          setEndTime(finalEndTime); // Stop the timer interval
           setTestCompleted(true);
-          const calculatedFinalTime = (finalEndTime - (startTime || finalEndTime)) / 1000;
+          const calculatedFinalTime = Math.floor(((finalEndTime - (startTime || finalEndTime)) / 1000));
           setFinalTime(calculatedFinalTime);
-          setElapsedTime(calculatedFinalTime);
+          setElapsedTime(calculatedFinalTime); // Ensure final time is shown
 
-          // Final WPM & Accuracy
-          const timeInMinutes = calculatedFinalTime / 60;
-          let finalCorrectChars = 0;
-          textToTypeChars.forEach((charState, index) => {
-            if (index < textToTypeChars.length - 1 && charState.state === 'correct') {
-              finalCorrectChars++;
-            } else if (index === textToTypeChars.length - 1 && newState === 'correct') {
-              finalCorrectChars++;
-            }
-          });
-
-          if (timeInMinutes > 0) {
-            const finalWpm = Math.round((finalCorrectChars / 5) / timeInMinutes);
-            setWpm(finalWpm >= 0 ? finalWpm : 0);
-          } else {
-            setWpm(0);
-          }
+          const finalWpm = calculateCurrentWPM(newIndex, finalEndTime);
+          setWpm(finalWpm);
 
           const finalAccuracy = textToTypeChars.length > 0
-            ? ((textToTypeChars.length - errors) / textToTypeChars.length) * 100
+            ? ((textToTypeChars.length - currentTotalErrors) / textToTypeChars.length) * 100
             : 100;
           setAccuracy(finalAccuracy < 0 ? 0 : finalAccuracy);
         }
@@ -212,31 +240,30 @@ const TypingTest: React.FC = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentIndex, textToTypeChars, testCompleted, startTime, isFocused, errors]);
+  }, [currentIndex, textToTypeChars, testCompleted, startTime, isFocused, errors, calculateCurrentWPM]);
 
-  // Handle focus/blur of the component area
+  // Handle focus/blur
   useEffect(() => {
     const handleFocus = () => setIsFocused(true);
     const handleBlur = () => setIsFocused(false);
-    const ref = containerRef.current;
-    if (ref) {
-      ref.addEventListener('focus', handleFocus);
-      ref.addEventListener('blur', handleBlur);
+    const currentRef = containerRef.current;
+    if (currentRef) {
+        currentRef.addEventListener('focus', handleFocus);
+        currentRef.addEventListener('blur', handleBlur);
     }
-    ref?.focus();
+    currentRef?.focus();
     return () => {
-      if (ref) {
-        ref.removeEventListener('focus', handleFocus);
-        ref.removeEventListener('blur', handleBlur);
-      }
+        if (currentRef) {
+            currentRef.removeEventListener('focus', handleFocus);
+            currentRef.removeEventListener('blur', handleBlur);
+        }
     };
   }, []);
 
-  // Render text characters with state-based styling
+  // Render text characters
   const renderText = () => {
     return textToTypeChars.map((charState, index) => {
       let className = styles.charPending;
@@ -245,7 +272,7 @@ const TypingTest: React.FC = () => {
       } else if (charState.state === 'incorrect') {
         className = styles.charIncorrect;
       }
-      if (index === currentIndex) {
+      if (index === currentIndex && isFocused) {
         className += ` ${styles.cursor}`;
       }
       return (
@@ -269,50 +296,90 @@ const TypingTest: React.FC = () => {
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
     >
-      <div className={styles.titlePlaceholder}>Type-Test ⌘</div>
-      <div className={styles.difficultySelectorBox}>
-        <button
-          onClick={() => handleDifficultyChange('short')}
-          className={difficulty === 'short' ? styles.activeDifficulty : ''}
-        >
-          Short
-        </button>
-        <button
-          onClick={() => handleDifficultyChange('medium')}
-          className={difficulty === 'medium' ? styles.activeDifficulty : ''}
-        >
-          Medium
-        </button>
-        <button
-          onClick={() => handleDifficultyChange('long')}
-          className={difficulty === 'long' ? styles.activeDifficulty : ''}
-        >
-          Long
-        </button>
-      </div>
+      <div className={styles.titlePlaceholder}>TYP3⌘T3ST</div>
+
+      {/* Difficulty Selector - Hide when test is completed */} 
+      {!testCompleted && (
+        <div className={styles.difficultySelectorBox}>
+          <button
+            onClick={() => handleDifficultyChange('short')}
+            className={difficulty === 'short' ? styles.activeDifficulty : ''}
+          >
+            Short
+          </button>
+          <button
+            onClick={() => handleDifficultyChange('medium')}
+            className={difficulty === 'medium' ? styles.activeDifficulty : ''}
+          >
+            Medium
+          </button>
+          <button
+            onClick={() => handleDifficultyChange('long')}
+            className={difficulty === 'long' ? styles.activeDifficulty : ''}
+          >
+            Long
+          </button>
+        </div>
+      )}
+
+      {/* Live Stats Display - Show only during active test */} 
+      {!testCompleted && startTime && (
+          <div className={styles.liveStatsContainer}>
+             <span>Time: {elapsedTime}s</span>
+             <span>WPM: {wpm}</span>
+             {/* Can add live accuracy/errors here if needed */}
+          </div>
+      )}
+
+      {/* Text Display Area */} 
       <div className={styles.textDisplayContainer}>
         {!isFocused && !testCompleted && <div className={styles.focusPrompt}>Click here to focus</div>}
-        <div className={styles.textDisplay} key={difficulty}>
+        <div className={styles.textDisplay} key={difficulty + textToTypeChars.map(c=>c.char).join('')}> 
           {renderText()}
         </div>
       </div>
-      <div className={styles.statsContainer}>
-        <span>Time: {testCompleted && finalTime !== null ? finalTime.toFixed(2) : elapsedTime.toFixed(2)}s</span>
-        <span>WPM: {wpm}</span>
-        <span>Acc: {accuracy.toFixed(1)}%</span>
-        <span>Errors: {errors}</span>
-      </div>
+
+      {/* Results Area - Show only on completion */} 
       {testCompleted && (
-        <div className={styles.resultContainer}>
-          <h2>Test Completed!</h2>
-          <p>
-            Time: {finalTime !== null ? finalTime.toFixed(2) : elapsedTime.toFixed(2)}s | WPM: {wpm} | Accuracy: {accuracy.toFixed(1)}%
-          </p>
-          <button onClick={() => resetTest()}>Try Again</button>
+        <div className={styles.resultsAreaContainer}> 
+          <div className={styles.resultSummaryContainer}>
+            <div className={styles.resultStat}> 
+              <div className={styles.resultLabel}>WPM</div>
+              <div className={styles.resultValue}>{wpm}</div>
+            </div>
+            <div className={styles.resultStat}> 
+              <div className={styles.resultLabel}>ACC</div>
+              <div className={styles.resultValue}>{accuracy.toFixed(1)}%</div>
+            </div>
+             <div className={styles.resultStat}> 
+              <div className={styles.resultLabel}>Time</div>
+              <div className={styles.resultValue}>{finalTime}s</div>
+            </div>
+             <div className={styles.resultStat}> 
+              <div className={styles.resultLabel}>Errors</div>
+              <div className={styles.resultValue}>{errors}</div>
+            </div>
+            <div className={styles.resultStat}> 
+              <div className={styles.resultLabel}>Keystrokes</div>
+              <div className={styles.resultValue}>{totalKeystrokes}</div>
+            </div>
+          </div>
+
+          <div className={styles.graphContainer}>
+            {performanceData.length > 0 ? (
+              <PerformanceGraph data={performanceData} />
+            ) : (
+              <p>No performance data recorded.</p>
+            )}
+          </div>
+
+          <button className={styles.resetButton} onClick={() => resetTest()}>Try Again</button>
         </div>
       )}
+
     </div>
   );
 };
 
 export default TypingTest;
+

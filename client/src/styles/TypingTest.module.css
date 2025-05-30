@@ -1,16 +1,17 @@
-/* TypingTest.module.css - MonkeyType Style */
+/* TypingTest.module.css - MonkeyType Style + Graph */
 
 /* Apply background and base font to the container */
 .typingTestContainer {
   display: flex;
   flex-direction: column;
   align-items: center; /* Center children horizontally */
-  justify-content: center; /* Center children vertically */
+  /* justify-content: center; Remove this to allow content flow from top */
   min-height: 100vh; /* Full viewport height */
   background-color: #696969; /* Dark grey background */
   color: #CCCCCC; /* Default light grey text */
   font-family: monospace, "Courier New", Courier; /* Typewriter font */
   padding: 2rem;
+  padding-top: 5rem; /* Add padding top to avoid overlap with title */
   box-sizing: border-box;
   position: relative; /* For absolute positioning of title */
   outline: none; /* Remove focus outline from container */
@@ -24,7 +25,6 @@
   font-size: 1.5rem;
   font-weight: bold;
   color: #E0E0E0; /* Lighter title color */
-  /* Add more styling as needed for the actual title */
 }
 
 /* Difficulty Selector Box */
@@ -90,9 +90,6 @@
 
 /* Cursor Style */
 .cursor {
-  /* Simple underline cursor */
-  /* border-bottom: 2px solid #D2B55B; */ 
-  /* Blinking block cursor (more like MonkeyType) */
   background-color: #D2B55B; /* Use correct color for cursor */
   color: #696969; /* Background color for text inside cursor */
   animation: blink 1s step-start infinite;
@@ -122,10 +119,8 @@
   pointer-events: none; /* Don't block clicks to container */
 }
 
-/* Stats Container (Optional - Style if kept) */
-.statsContainer {
-  /* Position like MonkeyType (top area) or keep below */
-  /* Example: Minimalist stats below */
+/* Live Stats Container (Optional) */
+.liveStatsContainer {
   margin-top: 1rem;
   color: #B0B0B0;
   font-size: 0.9rem;
@@ -133,49 +128,110 @@
   gap: 1.5rem;
 }
 
-/* Result Container (Optional - Style if kept) */
-.resultContainer {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background-color: #555555;
-  border-radius: 8px;
-  color: #E0E0E0;
+/* --- Results Area Styles --- */
+.resultsAreaContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 900px; /* Match text width */
+  margin-top: 2rem; /* Space above results */
+}
+
+.resultSummaryContainer {
+  display: flex;
+  justify-content: center; /* Center stats horizontally */
+  gap: 2rem; /* Space between stats */
+  margin-bottom: 2rem;
+  flex-wrap: wrap; /* Allow wrapping */
+}
+
+.resultStat {
   text-align: center;
 }
 
-.resultContainer h2 {
-  margin-bottom: 0.5rem;
+.resultLabel {
+  font-size: 0.9rem;
+  color: #B0B0B0; /* Light grey label */
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+.resultValue {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #D2B55B; /* Yellow for result values */
+}
+
+/* Graph Container */
+.graphContainer {
+  width: 100%;
+  height: 300px; /* Explicit height for chart */
+  margin-bottom: 2rem;
+  background-color: rgba(0, 0, 0, 0.1); /* Slightly darker background for graph area */
+  border-radius: 6px;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Custom Tooltip Style */
+.customTooltip {
+  background-color: rgba(40, 40, 40, 0.9); /* Dark tooltip background */
+  border: 1px solid #555555;
+  border-radius: 4px;
+  padding: 0.5rem 0.8rem;
+  color: #E0E0E0; /* Light text */
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.tooltipLabel {
+  font-weight: bold;
+  margin-bottom: 0.3rem;
   color: #FFFFFF;
 }
 
-.resultContainer p {
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
+.tooltipWpm {
+  color: #D2B55B; /* Yellow WPM */
+  margin: 0.1rem 0;
 }
 
-.resultContainer button {
+.tooltipErrors {
+  color: #A45A52; /* Red Errors */
+  margin: 0.1rem 0;
+}
+
+/* Reset Button */
+.resetButton {
   background-color: #D2B55B;
   color: #696969;
   border: none;
-  padding: 0.6rem 1.2rem;
+  padding: 0.7rem 1.5rem;
   border-radius: 4px;
   font-family: inherit;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  margin-top: 1rem; /* Space above button */
 }
 
-.resultContainer button:hover {
+.resetButton:hover {
   background-color: #E0C46F;
 }
 
 /* Remove styles for elements no longer used */
 .textInput {
-  display: none; /* Hide the old input box */
+  display: none;
+}
+.statsContainer {
+    display: none; /* Hide old stats container */
+}
+.resultContainer {
+    display: none; /* Hide old result container */
 }
 
-/* Responsive adjustments if needed */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .titlePlaceholder {
     font-size: 1.2rem;
@@ -192,14 +248,32 @@
   .difficultySelectorBox button {
     font-size: 0.9rem;
   }
+  .resultSummaryContainer {
+      gap: 1rem;
+  }
+  .resultValue {
+      font-size: 1.5rem;
+  }
+  .graphContainer {
+      height: 250px; /* Adjust height */
+  }
 }
 
 @media (max-width: 480px) {
+  .typingTestContainer {
+      padding-top: 4rem;
+  }
   .textDisplay {
     font-size: 1.2rem;
   }
-  .statsContainer {
-      gap: 1rem;
+  .resultValue {
+      font-size: 1.3rem;
+  }
+  .graphContainer {
+      height: 200px; /* Adjust height */
+      padding: 0.5rem;
+  }
+  .customTooltip {
       font-size: 0.8rem;
   }
 }
